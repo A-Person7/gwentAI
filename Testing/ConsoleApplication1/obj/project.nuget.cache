@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "cUV4PUoP4IoguoelWELnC++x9OJO3y1mfDnx2GI0BdjFt++n/ilRQwmDQFyguH6JfolRPKuIvmTOaLi85ynv0g==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\Lucas.Johnston22\\RiderProjects\\Testing\\ConsoleApplication1\\ConsoleApplication1.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Lucas.Johnston22\\.nuget\\packages\\microsoft.dotnet.upgradeassistant.extensions.default.analyzers\\0.3.310801\\microsoft.dotnet.upgradeassistant.extensions.default.analyzers.0.3.310801.nupkg.sha512",
+    "C:\\Users\\Lucas.Johnston22\\.nuget\\packages\\morelinq\\3.3.2\\morelinq.3.3.2.nupkg.sha512"
+  ],
+  "logs": []
+}

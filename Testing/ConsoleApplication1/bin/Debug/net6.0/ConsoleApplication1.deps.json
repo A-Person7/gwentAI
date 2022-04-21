@@ -1,0 +1,50 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v6.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v6.0": {
+      "ConsoleApplication1/1.0.0": {
+        "dependencies": {
+          "Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers": "0.3.310801",
+          "morelinq": "3.3.2"
+        },
+        "runtime": {
+          "ConsoleApplication1.dll": {}
+        }
+      },
+      "Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers/0.3.310801": {},
+      "morelinq/3.3.2": {
+        "runtime": {
+          "lib/netstandard2.0/MoreLinq.dll": {
+            "assemblyVersion": "3.3.2.0",
+            "fileVersion": "3.3.2.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "ConsoleApplication1/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers/0.3.310801": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-+rBuFxPhhB05/TdNoqEBFMvYPPubRzUBBXzEYT2WvQB4O7v5S0lk8SYVdbc7uOpAKYJPR2vtAVOlAY3KBih0LA==",
+      "path": "microsoft.dotnet.upgradeassistant.extensions.default.analyzers/0.3.310801",
+      "hashPath": "microsoft.dotnet.upgradeassistant.extensions.default.analyzers.0.3.310801.nupkg.sha512"
+    },
+    "morelinq/3.3.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-MQc8GppZJLmjvcpEdf3EkC6ovsp7gRWt2e5mC7dcIOrgwSc+yjFd3JQ0iRqr3XrUT6rb/phv0IkEmBtbfVA7AQ==",
+      "path": "morelinq/3.3.2",
+      "hashPath": "morelinq.3.3.2.nupkg.sha512"
+    }
+  }
+}

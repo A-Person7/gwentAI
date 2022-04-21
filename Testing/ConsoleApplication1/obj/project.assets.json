@@ -1,0 +1,141 @@
+{
+  "version": 3,
+  "targets": {
+    "net6.0": {
+      "Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers/0.3.310801": {
+        "type": "package",
+        "build": {
+          "build/Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers.props": {}
+        }
+      },
+      "morelinq/3.3.2": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.0/MoreLinq.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/MoreLinq.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers/0.3.310801": {
+      "sha512": "+rBuFxPhhB05/TdNoqEBFMvYPPubRzUBBXzEYT2WvQB4O7v5S0lk8SYVdbc7uOpAKYJPR2vtAVOlAY3KBih0LA==",
+      "type": "package",
+      "path": "microsoft.dotnet.upgradeassistant.extensions.default.analyzers/0.3.310801",
+      "hasTools": true,
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "analyzers/dotnet/cs/Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers.Common.dll",
+        "analyzers/dotnet/cs/Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers.dll",
+        "analyzers/dotnet/cs/Microsoft.DotNet.UpgradeAssistant.Extensions.Default.CodeFixes.dll",
+        "analyzers/dotnet/vb/Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers.Common.dll",
+        "analyzers/dotnet/vb/Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers.dll",
+        "analyzers/dotnet/vb/Microsoft.DotNet.UpgradeAssistant.Extensions.Default.CodeFixes.dll",
+        "build/Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers.props",
+        "build/TypeMaps.props",
+        "build/WebTypeReplacements.typemap",
+        "icon.png",
+        "microsoft.dotnet.upgradeassistant.extensions.default.analyzers.0.3.310801.nupkg.sha512",
+        "microsoft.dotnet.upgradeassistant.extensions.default.analyzers.nuspec",
+        "tools/install.ps1",
+        "tools/uninstall.ps1"
+      ]
+    },
+    "morelinq/3.3.2": {
+      "sha512": "MQc8GppZJLmjvcpEdf3EkC6ovsp7gRWt2e5mC7dcIOrgwSc+yjFd3JQ0iRqr3XrUT6rb/phv0IkEmBtbfVA7AQ==",
+      "type": "package",
+      "path": "morelinq/3.3.2",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "COPYING.txt",
+        "lib/net451/MoreLinq.dll",
+        "lib/net451/MoreLinq.pdb",
+        "lib/net451/MoreLinq.xml",
+        "lib/netstandard1.0/MoreLinq.dll",
+        "lib/netstandard1.0/MoreLinq.pdb",
+        "lib/netstandard1.0/MoreLinq.xml",
+        "lib/netstandard2.0/MoreLinq.dll",
+        "lib/netstandard2.0/MoreLinq.pdb",
+        "lib/netstandard2.0/MoreLinq.xml",
+        "morelinq.3.3.2.nupkg.sha512",
+        "morelinq.nuspec"
+      ]
+    }
+  },
+  "projectFileDependencyGroups": {
+    "net6.0": [
+      "Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers >= 0.3.310801",
+      "morelinq >= 3.3.2"
+    ]
+  },
+  "packageFolders": {
+    "C:\\Users\\Lucas.Johnston22\\.nuget\\packages\\": {}
+  },
+  "project": {
+    "version": "1.0.0",
+    "restore": {
+      "projectUniqueName": "C:\\Users\\Lucas.Johnston22\\RiderProjects\\Testing\\ConsoleApplication1\\ConsoleApplication1.csproj",
+      "projectName": "ConsoleApplication1",
+      "projectPath": "C:\\Users\\Lucas.Johnston22\\RiderProjects\\Testing\\ConsoleApplication1\\ConsoleApplication1.csproj",
+      "packagesPath": "C:\\Users\\Lucas.Johnston22\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Lucas.Johnston22\\RiderProjects\\Testing\\ConsoleApplication1\\obj\\",
+      "projectStyle": "PackageReference",
+      "configFilePaths": [
+        "C:\\Users\\Lucas.Johnston22\\AppData\\Roaming\\NuGet\\NuGet.Config"
+      ],
+      "originalTargetFrameworks": [
+        "net6.0"
+      ],
+      "sources": {
+        "https://api.nuget.org/v3/index.json": {}
+      },
+      "frameworks": {
+        "net6.0": {
+          "targetAlias": "net6.0",
+          "projectReferences": {}
+        }
+      },
+      "warningProperties": {
+        "warnAsError": [
+          "NU1605"
+        ]
+      }
+    },
+    "frameworks": {
+      "net6.0": {
+        "targetAlias": "net6.0",
+        "dependencies": {
+          "Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers": {
+            "suppressParent": "All",
+            "target": "Package",
+            "version": "[0.3.310801, )"
+          },
+          "morelinq": {
+            "target": "Package",
+            "version": "[3.3.2, )"
+          }
+        },
+        "imports": [
+          "net461",
+          "net462",
+          "net47",
+          "net471",
+          "net472",
+          "net48"
+        ],
+        "assetTargetFallback": true,
+        "warn": true,
+        "frameworkReferences": {
+          "Microsoft.NETCore.App": {
+            "privateAssets": "all"
+          }
+        },
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.202\\RuntimeIdentifierGraph.json"
+      }
+    }
+  }
+}
