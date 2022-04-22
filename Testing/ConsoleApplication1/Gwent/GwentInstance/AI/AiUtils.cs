@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Linq;
 using System.Reflection;
-// ReSharper disable All
 
 namespace ConsoleApplication1.Gwent.GwentInstance.AI;
 
@@ -10,58 +9,65 @@ using System.Collections.Generic;
 
 public static class AiUtils
 {
-    // certified sketchy
-    public static int GetAiHash(IEnumerable<IHashable> hashables)
+    private static int GetAiHash(IEnumerable<IHashable> hashables)
     {
         return hashables.Select((t, i) => t.GetAiHash() * (int) Math.Pow(31, i)).Sum();
     }
 
-    
+    // lmao   
     public static int HashInternalElements(Object o)
     {
         Type t = o.GetType();
         int workingHash = 0;
-        FieldInfo[] fields = t.GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-        
+        // private fields are respected as HashCode, HashInternalElements, and GetAiHash are all pure
+
+        const BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
+
+        FieldInfo[] fields = t.GetFields(flags);
+        PropertyInfo[] properties = t.GetProperties(flags);
+
+        MemberInfo[] members = ((MemberInfo[]) fields).Concat(properties)
+            .Where(m => m.GetCustomAttribute<HashFieldAttribute>() != null)
+            .ToArray();
+
+
         int workingExponent = 0;
-        
-        foreach (FieldInfo fieldInfo in fields)
+
+        foreach (MemberInfo member in members)
         {
-            object? value = fieldInfo.GetValue(o);
-            
-            if (AttributesContainsType(fieldInfo, typeof(HashFieldAttribute)))
+            object value = member switch
             {
-                // todo - potentially change switch statement to yield value, and then multiply that by
-                // 31^workingExponent
-                switch (value)
-                {
-                    case null:
-                        break;
-                    case IHashable iHashable:
-                        workingHash += iHashable.GetAiHash() * (int) Math.Pow(31, workingExponent);
-                        break;
-                    case IEnumerable<IHashable> hashList:
-                        workingHash += GetAiHash((IEnumerable<IHashable>) value) *
-                                       (int) Math.Pow(31, workingExponent) ;
-                        break;
-                    case IDictionary dictionary:
-                        workingHash += GetAiHash((ICollection<IHashable>) dictionary.Values) *
-                            (int) Math.Pow(31, workingExponent);
-                        break;
-                    default:
-                        workingHash += value.GetHashCode() * (int) Math.Pow(31, workingExponent);
-                        break;
-                }
+                FieldInfo field => field.GetValue(o),
+                PropertyInfo property => property.GetValue(o),
+                _ => null
+            };
 
-                workingExponent++;
+            // todo - potentially change switch statement to yield value, and then multiply that by
+            // 31^workingExponent
+            switch (value)
+            {
+                case null:
+                    break;
+                case IHashable iHashable:
+                    workingHash += iHashable.GetAiHash() * (int) Math.Pow(31, workingExponent);
+                    break;
+                case IEnumerable<IHashable> hashList:
+                    workingHash += GetAiHash(hashList) *
+                                   (int) Math.Pow(31, workingExponent);
+                    break;
+                case IDictionary dictionary:
+                    workingHash += GetAiHash((ICollection<IHashable>) dictionary.Values) *
+                                   (int) Math.Pow(31, workingExponent);
+                    break;
+                default:
+                    workingHash += value.GetHashCode() * (int) Math.Pow(31, workingExponent);
+                    break;
             }
-        }
-        
-        return workingHash;
-    }
 
-    private static bool AttributesContainsType(FieldInfo field, Type t) {
-        return field.IsDefined(t, false);
+            workingExponent++;
+        }
+
+        return workingHash;
     }
 }
 
@@ -73,5 +79,4 @@ public interface IHashable
 // Use this to tag fields the ai hasher should look at
 public class HashFieldAttribute : Attribute
 {
-
 }

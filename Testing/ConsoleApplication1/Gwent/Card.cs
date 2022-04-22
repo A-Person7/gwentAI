@@ -59,7 +59,7 @@ public abstract class Card : IHashable
     // should never return true if the card has any other abilities
     public bool IsHero => Abilities == AbilityTypes.Hero;
     
-    [field: HashField]
+    [HashField]
     public Types Type { get; set; }
 
     [HashField]
@@ -89,20 +89,18 @@ public abstract class Card : IHashable
     public bool Agile => IsMelee && IsRanged;
 
     // this should only ever be true if special ability is true as well
-    [HashField]
-    protected bool SpecialAbilityDoubler => Abilities.HasFlag(AbilityTypes.Horn);
+    [HashField] private bool SpecialAbilityDoubler => Abilities.HasFlag(AbilityTypes.Horn);
 
     [HashField]
     public bool Spy { get; set; }
 
-    [HashField]
-    public bool SummonCard { get; set; }
+    [HashField] protected bool SummonCard { get; set; }
 
     /// <summary>
     /// Should only be defined if SummonCard is true.
     /// </summary>
     [HashField]
-    public Type Replacement { get; set; }
+    protected Type Replacement { get; set; }
 
     [HashField]
     public int ActingValue => GetActingValue();
