@@ -133,7 +133,6 @@ public class OpponentTrueAi : OpponentBaseUtils
         // morelinq
         Move m = GetPossibleMoves().MaxBy(MoveToStrength);
         Play(m);
-        Console.WriteLine(m.ToString());
     }
 
     private float MoveToStrength(Move m)
@@ -155,8 +154,8 @@ public class OpponentTrueAi : OpponentBaseUtils
     // gets the move in the context of this player, the current opponent, and game instance
     private float MoveInContext(Move m)
     {
-        return AiUtils.GetAiHash(m, this, GameInstance.Players[GameInstance.OpponentOf(PlayerType)], 
-            GameInstance);
+        return AiUtils.GetAiHash(GameInstance, GameInstance.Players[GameInstance.OpponentOf(PlayerType)],  
+                this, m);
     }
 
     // note - must be pure with respect to prev weightCoefficients
