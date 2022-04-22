@@ -15,7 +15,7 @@ public class OpponentTrueAi : OpponentBaseUtils
     // only copies should technically be deviated from
     private readonly List<List<float>> _weightCoefficients;
 
-    private static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions
+    private static readonly JsonSerializerOptions JsonOptions = new()
     {
         AllowTrailingCommas = true,
         PropertyNameCaseInsensitive = true,
@@ -35,17 +35,19 @@ public class OpponentTrueAi : OpponentBaseUtils
     // note - this is not a true clone -- weightCoefficients list is adjusted by a random amount to get a similar deck
     private OpponentTrueAi(OpponentTrueAi toCopy) : base(toCopy)
     {
+        float randDeviance = _generations < 10 ? 300f : 20f;
+        
         try
         {
             FileInfo fileInfo = GetLastFile();
             _weightCoefficients = int.Parse(fileInfo.Name.Substring(0, fileInfo.Name.Length -
                                                                        DataTargetFileEnding.Length)) > _generations ? 
                 GetLastCoefficients() : 
-                GetCoefficientsWDeviance(toCopy._weightCoefficients, _generations < 10 ? 100f : 20f);
+                GetCoefficientsWDeviance(toCopy._weightCoefficients, randDeviance);
         }
         catch (IOException)
         {
-            _weightCoefficients = GetCoefficientsWDeviance(toCopy._weightCoefficients, _generations < 10 ? 100f : 20f);
+            _weightCoefficients = GetCoefficientsWDeviance(toCopy._weightCoefficients, randDeviance);
         }
     }
 
@@ -111,7 +113,7 @@ public class OpponentTrueAi : OpponentBaseUtils
         // v is starting value
         float v = 0.75f;
 
-        int[] startingShape = {4, 4, 5, 6, 5, 4, 3};
+        int[] startingShape = {2, 3, 2};
 
         foreach (int i in startingShape)
         {
@@ -126,10 +128,21 @@ public class OpponentTrueAi : OpponentBaseUtils
 
         return workingList;
     }
-
-    // time for some cognitive complexity coding and magic numbers/values/methods, etc.
+    
     public override void OnTurn()
     {
+        if (Passed)
+        {
+            return;
+        }
+
+        if (Opponent.Passed && Value > Opponent.Value)
+        {
+            // you win
+            Pass();
+            return;
+        }
+        
         // morelinq
         Move m = GetPossibleMoves().MaxBy(MoveToStrength);
         Play(m);
@@ -138,7 +151,6 @@ public class OpponentTrueAi : OpponentBaseUtils
     private float MoveToStrength(Move m)
     {
         float workingValue = MoveInContext(m);
-        Console.WriteLine("Move: " + m + " has initial strength in context: " + workingValue);
         float lastValue = workingValue;
 
         foreach (float workingLocalValue in _weightCoefficients
@@ -148,6 +160,8 @@ public class OpponentTrueAi : OpponentBaseUtils
             workingValue += workingLocalValue;
         }
 
+        Console.WriteLine("Move: " + m + " has initial strength in context: " + workingValue);
+        
         return workingValue;
     }
 
