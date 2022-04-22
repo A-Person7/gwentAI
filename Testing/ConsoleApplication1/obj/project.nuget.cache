@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "B26qmjeaTWBdzbUemh9ZKBHI/OPvOG8Wcsb6DZT54RFGFQPXuINzR63H2htd8r+hOO1zoaIGCjSTmrJZJJ94QQ==",
+  "dgSpecHash": "4xoRY0EsajIM02qCfkriQXPvLZlcx+W01MIZSYPoJFU7vu6I7H4C2xXhiKryHkpEGFQxxGfzCOrZPGNpY9w/0g==",
   "success": true,
-  "projectFilePath": "C:\\Users\\Lucas' Desktop\\Documents\\GitHub\\gwentAI\\Testing\\ConsoleApplication1\\ConsoleApplication1.csproj",
+  "projectFilePath": "C:\\Users\\Lucas.Johnston22\\Github\\gwentAI\\Testing\\ConsoleApplication1\\ConsoleApplication1.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\Lucas' Desktop\\.nuget\\packages\\microsoft.dotnet.upgradeassistant.extensions.default.analyzers\\0.3.310801\\microsoft.dotnet.upgradeassistant.extensions.default.analyzers.0.3.310801.nupkg.sha512",
-    "C:\\Users\\Lucas' Desktop\\.nuget\\packages\\morelinq\\3.3.2\\morelinq.3.3.2.nupkg.sha512"
+    "C:\\Users\\Lucas.Johnston22\\.nuget\\packages\\microsoft.dotnet.upgradeassistant.extensions.default.analyzers\\0.3.310801\\microsoft.dotnet.upgradeassistant.extensions.default.analyzers.0.3.310801.nupkg.sha512",
+    "C:\\Users\\Lucas.Johnston22\\.nuget\\packages\\morelinq\\3.3.2\\morelinq.3.3.2.nupkg.sha512"
   ],
   "logs": []
 }

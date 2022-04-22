@@ -16,7 +16,7 @@ public class GameInstance : IHashable
     // whether the game will display with (G)UI or not
     public bool Silent { get; set; }
 
-    [HashDictionary] public readonly Dictionary<Row.RowTypes, Card> _weatherCards;
+    [HashField] public readonly Dictionary<Row.RowTypes, Card> _weatherCards;
 
     public enum PlayerType
     {
@@ -149,9 +149,9 @@ public class GameInstance : IHashable
         Opponent.DrawCard();
     }
 
-    [HashDictionary] public Dictionary<Row.RowTypes, Card> WeatherCards => _weatherCards;
+    [HashField] public Dictionary<Row.RowTypes, Card> WeatherCards => _weatherCards;
 
-    [HashDictionary] public Dictionary<PlayerType, Player> Players { get; }
+    [HashField] public Dictionary<PlayerType, Player> Players { get; }
 
     [HashField] public PlayerType CurrentPlayer { get; set; }
 

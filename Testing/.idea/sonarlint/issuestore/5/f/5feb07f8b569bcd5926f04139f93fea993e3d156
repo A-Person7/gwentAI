@@ -1,9 +1,0 @@
-
-{csharpsquid:S3776@"RRefactor this method to reduce its Cognitive Complexity from 16 to the 15 allowed.(µáÎüÿÿÿÿ8äòõÔ„0
-mcsharpsquid:S1104""DMake this field 'private' and encapsulate it in a 'public' property.(ÒÌâ–øÿÿÿÿ8äâöÔ„0
-“csharpsquid:S3887"jUse an immutable collection or reduce the accessibility of the non-private readonly field '_weatherCards'.(µáÎüÿÿÿÿ8ôâöÔ„0
-csharpsquid:S3887 "dUse an immutable collection or reduce the accessibility of the non-private readonly field '_rounds'.(ÒÌâ–øÿÿÿÿ8ƒãöÔ„0
-]csharpsquid:S1135B"4Complete the task associated to this 'TODO' comment.(ÒÌâ–øÿÿÿÿ8öòõÔ„0
-]csharpsquid:S1135C"4Complete the task associated to this 'TODO' comment.(±¥®†ıÿÿÿÿ8¯ª÷Ô„0
-]csharpsquid:S1135c"4Complete the task associated to this 'TODO' comment.(µáÎüÿÿÿÿ8øòõÔ„0
-^csharpsquid:S1135È"4Complete the task associated to this 'TODO' comment.(æÀö€øÿÿÿÿ8Áª÷Ô„0

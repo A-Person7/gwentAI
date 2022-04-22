@@ -27,7 +27,7 @@ public class Row : IList<Card>, IHashable
     [HashField]
     private GameInstance.PlayerType PlayerType { get; }
     
-    [HashList]
+    [HashField]
     private List<Card> CardInRow { get; }
 
     [HashField]

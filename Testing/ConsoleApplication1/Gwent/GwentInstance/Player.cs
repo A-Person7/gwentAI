@@ -46,13 +46,13 @@ public class Player : IHashable
     [HashFieldAttribute]
     public int Value => Rows.Values.Sum(r => r.Value);
 
-    [HashList]
+    [HashField]
     public Dictionary<Row.RowTypes, Row> Rows { get; set; }
-    [HashList]
+    [HashField]
     public List<Card> DiscardPile { get; set; }
-    [HashList]
+    [HashField]
     protected List<Card> Hand { get; set; }
-    [HashList]
+    [HashField]
     public List<Card> Deck { get; set; }
 
     // This is needed for OpponentTrueAI calculations as well
