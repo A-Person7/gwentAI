@@ -53,7 +53,7 @@ public abstract class OpponentBaseUtils : Player
             return new Move(Card.Clone, Type, RowType);
         }
         
-        public int  GetAiHash()
+        public long GetAiHash()
         {
             return AiUtils.HashInternalElements(this);
         }

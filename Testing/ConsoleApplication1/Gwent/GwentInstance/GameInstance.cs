@@ -185,7 +185,7 @@ public class GameInstance : IHashable
         return output.ToString();
     }
 
-    public int GetAiHash()
+    public long GetAiHash()
     {
         return AiUtils.HashInternalElements(this);
     }

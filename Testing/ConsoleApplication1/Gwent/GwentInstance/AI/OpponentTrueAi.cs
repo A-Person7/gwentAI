@@ -138,7 +138,8 @@ public class OpponentTrueAi : OpponentBaseUtils
 
     private float MoveToStrength(Move m)
     {
-        float workingValue = m.GetAiHash();
+        float workingValue = MoveInContext(m);
+        Console.WriteLine("Move: " + m + " has initial strength in context: " + workingValue);
         float lastValue = workingValue;
 
         foreach (float workingLocalValue in _weightCoefficients
@@ -151,6 +152,12 @@ public class OpponentTrueAi : OpponentBaseUtils
         return workingValue;
     }
 
+    // gets the move in the context of this player, the current opponent, and game instance
+    private float MoveInContext(Move m)
+    {
+        return AiUtils.GetAiHash(m, this, GameInstance.Players[GameInstance.OpponentOf(PlayerType)], 
+            GameInstance);
+    }
 
     // note - must be pure with respect to prev weightCoefficients
     private List<List<float>> GetCoefficientsWDeviance(List<List<float>> prevCoefficients, float maxDeviance)
@@ -241,17 +248,23 @@ public class OpponentTrueAi : OpponentBaseUtils
         while (true)
         {
 
-            GameInstance g = new GameInstance(playerDeck, opponentDeck);
-            g.Silent = true;
+            GameInstance g = new GameInstance(playerDeck, opponentDeck)
+            {
+                Silent = true,
+                Players =
+                {
+                    [GameInstance.PlayerType.Player] = new OpponentTrueAi(workingBest),
+                    [GameInstance.PlayerType.Opponent] = new OpponentTrueAi(workingBest)
+                }
+            };
 
-            g.Players[GameInstance.PlayerType.Opponent] = new OpponentTrueAi(workingBest);
             g.Players[GameInstance.PlayerType.Opponent].GameInstance = g;
             g.Players[GameInstance.PlayerType.Opponent].Deck =
-                new List<Card>(opponentDeck.Select(c => c.Clone).ToList());
+                CardListAssignedGame(new List<Card>(opponentDeck.Select(c => c.Clone).ToList()), g);
 
-            g.Players[GameInstance.PlayerType.Player] = new OpponentTrueAi(workingBest);
             g.Players[GameInstance.PlayerType.Player].GameInstance = g;
-            g.Players[GameInstance.PlayerType.Player].Deck = new List<Card>(playerDeck.Select(c => c.Clone).ToList());
+            g.Players[GameInstance.PlayerType.Player].Deck = 
+                CardListAssignedGame(new List<Card>(playerDeck.Select(c => c.Clone).ToList()), g);
 
             g.Play();
 
@@ -274,5 +287,11 @@ public class OpponentTrueAi : OpponentBaseUtils
 
             Console.WriteLine("\n{0} games simulated\n", _generations);
         }
+    }
+    
+    private static List<Card> CardListAssignedGame(List<Card> cards, GameInstance g)
+    {
+        cards.ForEach(c => c.GameInstance = g);
+        return cards;
     }
 }

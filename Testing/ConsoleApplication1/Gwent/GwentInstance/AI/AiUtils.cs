@@ -9,17 +9,22 @@ using System.Collections.Generic;
 
 public static class AiUtils
 {
-    private static int GetAiHash(IEnumerable<IHashable> hashables)
+    private static long GetAiHash(IEnumerable<IHashable> hashables)
     {
-        return hashables.Select((t, i) => t.GetAiHash() * (int) Math.Pow(31, i)).Sum();
+        return hashables.Select((t, i) => t == null ? 0 : 
+            t.GetAiHash() * (long) Math.Pow(31, i)).Sum();
     }
-
-    // lmao   
-    public static int HashInternalElements(Object o)
+    
+    public static long GetAiHash(params IHashable[] hashables)
+    {
+        return GetAiHash(hashables.ToList());
+    }
+    
+    public static long HashInternalElements(Object o)
     {
         Type t = o.GetType();
-        int workingHash = 0;
-        // private fields are respected as HashCode, HashInternalElements, and GetAiHash are all pure
+        long workingHash = 0;
+        // private fields are respected as HashCode, HashlongernalElements, and GetAiHash are all pure
 
         const BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
 
@@ -41,28 +46,17 @@ public static class AiUtils
                 PropertyInfo property => property.GetValue(o),
                 _ => null
             };
-
-            // todo - potentially change switch statement to yield value, and then multiply that by
-            // 31^workingExponent
-            switch (value)
+            
+            workingHash += value switch
             {
-                case null:
-                    break;
-                case IHashable iHashable:
-                    workingHash += iHashable.GetAiHash() * (int) Math.Pow(31, workingExponent);
-                    break;
-                case IEnumerable<IHashable> hashList:
-                    workingHash += GetAiHash(hashList) *
-                                   (int) Math.Pow(31, workingExponent);
-                    break;
-                case IDictionary dictionary:
-                    workingHash += GetAiHash((ICollection<IHashable>) dictionary.Values) *
-                                   (int) Math.Pow(31, workingExponent);
-                    break;
-                default:
-                    workingHash += value.GetHashCode() * (int) Math.Pow(31, workingExponent);
-                    break;
-            }
+                IHashable iHashable => iHashable.GetAiHash(),
+                IEnumerable<IHashable> hashList => GetAiHash(hashList),
+                    
+                IDictionary dictionary => GetAiHash(dictionary.Values.Cast<IHashable>().ToList()),
+                
+                null => 0,
+                not null => value.GetHashCode()
+            } * (long) Math.Pow(31, workingExponent);
 
             workingExponent++;
         }
@@ -73,7 +67,7 @@ public static class AiUtils
 
 public interface IHashable
 {
-    int GetAiHash();
+    long GetAiHash();
 }
 
 // Use this to tag fields the ai hasher should look at

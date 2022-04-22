@@ -101,8 +101,7 @@ public abstract class Card : IHashable
     /// </summary>
     [HashField]
     protected Type Replacement { get; set; }
-
-    [HashField]
+    
     public int ActingValue => GetActingValue();
     
     public bool IsMelee => (Type & Types.Melee) == Types.Melee;
@@ -145,7 +144,7 @@ public abstract class Card : IHashable
                "Acting Value: " + ActingValue;
     }
 
-    public int GetAiHash()
+    public long GetAiHash()
     {
         return AiUtils.HashInternalElements(typeof(Card));
     }

@@ -45,19 +45,21 @@ public class Row : IList<Card>, IHashable
         {
             Add(item);
             return;
-        } 
-        if ((type & Card.Types.SpecialAbility) == Card.Types.SpecialAbility)
+        }
+
+        if ((type & Card.Types.SpecialAbility) != Card.Types.SpecialAbility)
         {
-            if (_specialAbility == null)
-            {
-                throw new AggregateException("Special ability is already set");
-            }
-            _specialAbility = item;
-            return;
+            throw new ArgumentException("Card " + item.Name + " with a given type of " + type + " is not of type "
+                                        + RowType);
         }
         
-        throw new ArgumentException("Card " + item.Name + " with a given type of " + type + " is not of type " 
-                                    + RowType);
+
+        if (_specialAbility == null)
+        {
+            throw new ArgumentException("Special ability is already set");
+        }
+        
+        _specialAbility = item;
     }
     
     /// <summary>
@@ -99,7 +101,7 @@ public class Row : IList<Card>, IHashable
         return output.ToString();
     }
 
-    public int GetAiHash()
+    public long GetAiHash()
     {
         return AiUtils.HashInternalElements(this);
     }
