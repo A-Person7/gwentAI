@@ -23,7 +23,24 @@ public class Row : IList<Card>, IHashable
     private Card _specialAbility;
     [HashField]
     private RowTypes RowType { get; }
-    public GameInstance GameInstance { get; set; }
+
+    private GameInstance _gameInstance;
+    
+    public GameInstance GameInstance
+    {
+        get => _gameInstance;
+        set
+        {
+            CardInRow.ForEach(c => c.GameInstance = value);
+            if (_specialAbility != null)
+            {
+                _specialAbility.GameInstance = value;
+            }
+
+            _gameInstance = value;
+        }
+    }
+
     [HashField]
     private GameInstance.PlayerType PlayerType { get; }
     
@@ -31,8 +48,16 @@ public class Row : IList<Card>, IHashable
     private List<Card> CardInRow { get; }
 
     [HashField]
-    public int Value => CardInRow.Sum(c => c.ActingValue);
-    
+    public int Value {
+        get
+        {
+            if (GameInstance == null)
+            {
+                throw new Exception("GameInstance is null");
+            }
+            return CardInRow.Sum(c => c.ActingValue);
+        }
+    }
 
     public static bool IsRowType(Card.Types type)
     {

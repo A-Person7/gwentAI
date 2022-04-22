@@ -30,17 +30,32 @@ public class Player : IHashable
         // these rows should all be overwritten by the gameinstance copy ctor. They are here to define the keys
         Rows = new Dictionary<Row.RowTypes, Row>
         {
-            [Row.RowTypes.Melee] = new Row(toCopy.GameInstance, PlayerType, Row.RowTypes.Melee),
-            [Row.RowTypes.Ranged] = new Row(toCopy.GameInstance, PlayerType, Row.RowTypes.Ranged),
-            [Row.RowTypes.Siege] = new Row(toCopy.GameInstance, PlayerType, Row.RowTypes.Siege)
+            [Row.RowTypes.Melee] = new(toCopy.GameInstance, PlayerType, Row.RowTypes.Melee),
+            [Row.RowTypes.Ranged] = new(toCopy.GameInstance, PlayerType, Row.RowTypes.Ranged),
+            [Row.RowTypes.Siege] = new(toCopy.GameInstance, PlayerType, Row.RowTypes.Siege)
         };
     }
     
     [HashFieldAttribute]
     public bool Passed { get; set; }
 
+    private GameInstance _gameInstance;
+    
     // not readonly because it will need to be modified in the gameinstance copy constructor
-    public GameInstance GameInstance;
+    public GameInstance GameInstance
+    {
+        get => _gameInstance;
+        set
+        {
+            // TODO - determine why Rows can be null here
+            if (value != null && Rows != null)
+            {
+                Rows.Values.ToList().ForEach(r => r.GameInstance = value);
+            }
+
+            _gameInstance = value;
+        }
+    }
     [HashFieldAttribute]
     public readonly GameInstance.PlayerType PlayerType;
     [HashFieldAttribute]
@@ -65,9 +80,9 @@ public class Player : IHashable
 
         Rows = new Dictionary<Row.RowTypes, Row>
         {
-            [Row.RowTypes.Melee] = new Row(GameInstance, PlayerType, Row.RowTypes.Melee),
-            [Row.RowTypes.Ranged] = new Row(GameInstance, PlayerType, Row.RowTypes.Ranged),
-            [Row.RowTypes.Siege] = new Row(GameInstance, PlayerType, Row.RowTypes.Siege)
+            [Row.RowTypes.Melee] = new(GameInstance, PlayerType, Row.RowTypes.Melee),
+            [Row.RowTypes.Ranged] = new(GameInstance, PlayerType, Row.RowTypes.Ranged),
+            [Row.RowTypes.Siege] = new(GameInstance, PlayerType, Row.RowTypes.Siege)
         };
 
         Hand = new List<Card>();
@@ -148,7 +163,8 @@ public class Player : IHashable
 
                 List<Func<String, UserInterface.ActionWrapper>> inputToMethod = new List<Func<string, UserInterface.ActionWrapper>>
                 {
-                    s => actions.First(a => a.ToString()?.ToLower() == s.ToLower())
+                    s => actions.First(a => String.Equals(a.ToString(), s, 
+                        StringComparison.CurrentCultureIgnoreCase))
                 };
 
                 Action action = UserInterface.GetChoiceFromInput(actions, a => a.ToString(),

@@ -247,7 +247,6 @@ public class OpponentTrueAi : OpponentBaseUtils
         
         while (true)
         {
-
             GameInstance g = new GameInstance(playerDeck, opponentDeck)
             {
                 Silent = true,
@@ -260,11 +259,11 @@ public class OpponentTrueAi : OpponentBaseUtils
 
             g.Players[GameInstance.PlayerType.Opponent].GameInstance = g;
             g.Players[GameInstance.PlayerType.Opponent].Deck =
-                CardListAssignedGame(new List<Card>(opponentDeck.Select(c => c.Clone).ToList()), g);
+                new List<Card>(opponentDeck.Select(c => c.Clone).ToList());
 
             g.Players[GameInstance.PlayerType.Player].GameInstance = g;
             g.Players[GameInstance.PlayerType.Player].Deck = 
-                CardListAssignedGame(new List<Card>(playerDeck.Select(c => c.Clone).ToList()), g);
+                new List<Card>(playerDeck.Select(c => c.Clone).ToList());
 
             g.Play();
 
@@ -287,11 +286,5 @@ public class OpponentTrueAi : OpponentBaseUtils
 
             Console.WriteLine("\n{0} games simulated\n", _generations);
         }
-    }
-    
-    private static List<Card> CardListAssignedGame(List<Card> cards, GameInstance g)
-    {
-        cards.ForEach(c => c.GameInstance = g);
-        return cards;
     }
 }
