@@ -12,10 +12,10 @@ public class Player : IHashable
     {
         if (player is OpponentAI opponentAi)
         {
-            return new OpponentAI(opponentAi);
+            return new(opponentAi);
         }
 
-        return new Player(player);
+        return new(player);
     }
     
     protected Player(Player toCopy)
@@ -35,6 +35,8 @@ public class Player : IHashable
             [Row.RowTypes.Siege] = new(toCopy.GameInstance, PlayerType, Row.RowTypes.Siege)
         };
     }
+    
+    protected Player Opponent => GameInstance.Players[GameInstance.OpponentOf(PlayerType)];
     
     [HashFieldAttribute]
     public bool Passed { get; set; }
