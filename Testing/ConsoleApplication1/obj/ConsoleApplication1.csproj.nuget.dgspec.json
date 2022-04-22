@@ -1,25 +1,27 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Lucas.Johnston22\\RiderProjects\\Testing\\ConsoleApplication1\\ConsoleApplication1.csproj": {}
+    "C:\\Users\\Lucas' Desktop\\Documents\\GitHub\\gwentAI\\Testing\\ConsoleApplication1\\ConsoleApplication1.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Lucas.Johnston22\\RiderProjects\\Testing\\ConsoleApplication1\\ConsoleApplication1.csproj": {
+    "C:\\Users\\Lucas' Desktop\\Documents\\GitHub\\gwentAI\\Testing\\ConsoleApplication1\\ConsoleApplication1.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Lucas.Johnston22\\RiderProjects\\Testing\\ConsoleApplication1\\ConsoleApplication1.csproj",
+        "projectUniqueName": "C:\\Users\\Lucas' Desktop\\Documents\\GitHub\\gwentAI\\Testing\\ConsoleApplication1\\ConsoleApplication1.csproj",
         "projectName": "ConsoleApplication1",
-        "projectPath": "C:\\Users\\Lucas.Johnston22\\RiderProjects\\Testing\\ConsoleApplication1\\ConsoleApplication1.csproj",
-        "packagesPath": "C:\\Users\\Lucas.Johnston22\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Lucas.Johnston22\\RiderProjects\\Testing\\ConsoleApplication1\\obj\\",
+        "projectPath": "C:\\Users\\Lucas' Desktop\\Documents\\GitHub\\gwentAI\\Testing\\ConsoleApplication1\\ConsoleApplication1.csproj",
+        "packagesPath": "C:\\Users\\Lucas' Desktop\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Lucas' Desktop\\Documents\\GitHub\\gwentAI\\Testing\\ConsoleApplication1\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\Lucas.Johnston22\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\Lucas' Desktop\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net6.0"
         ],
         "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -63,7 +65,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.202\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.201\\RuntimeIdentifierGraph.json"
         }
       }
     }

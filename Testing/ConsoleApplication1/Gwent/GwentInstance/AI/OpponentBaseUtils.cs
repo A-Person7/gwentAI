@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace ConsoleApplication1.Gwent.GwentInstance.AI;
 
@@ -18,13 +17,22 @@ public abstract class OpponentBaseUtils : Player
     public sealed class Move : IHashable
     {
         public static readonly Move PassConst =
-            new Move(null, Card.Types.Melee, Row.RowTypes.Melee);
+            new Move(null, Card.Types.Melee);
 
-        public Move(Card Card, Card.Types Type, Row.RowTypes TypeSpecialAbility)
+        // note - the type is treated as both the type of the card for general cards and the row to play a special
+        // ability card in
+        public Move(Card card, Card.Types type, Row.RowTypes rowTypes)
         {
-            this.Card = Card;
-            this.Type = Type;
-            this.TypeSpecialAbility = TypeSpecialAbility;
+            Card = card;
+            Type = type;
+            RowType = rowTypes;
+        }
+        
+        public Move (Card card, Card.Types type)
+        {
+            Card = card;
+            Type = type;
+            RowType = Row.RowTypes.Melee;
         }
 
         public bool Pass => Card == null;
@@ -33,8 +41,8 @@ public abstract class OpponentBaseUtils : Player
         [HashField]
         public Card.Types Type { get; init; }
         [HashField]
-        public Row.RowTypes TypeSpecialAbility { get; init; }
-
+        public Row.RowTypes RowType { get; init; }
+        
         public Move GetClone()
         {
             if (Pass)
@@ -42,24 +50,25 @@ public abstract class OpponentBaseUtils : Player
                 return PassConst;
             }
 
-            return new Move(Card.Clone, Type, TypeSpecialAbility);
+            return new Move(Card.Clone, Type, RowType);
         }
         
-        public int GetAiHash()
+        public int  GetAiHash()
         {
             return AiUtils.HashInternalElements(this);
         }
 
-        public void Deconstruct(out Card Card, out Card.Types Type, out Row.RowTypes TypeSpecialAbility)
+        // from when Move was a Record
+        public void Deconstruct(out Card card, out Card.Types type, out Row.RowTypes rowTypes)
         {
-            Card = this.Card;
-            Type = this.Type;
-            TypeSpecialAbility = this.TypeSpecialAbility;
+            card = Card;
+            type = Type;
+            rowTypes = RowType;
         }
-        
+
         public override string ToString()
         {
-            return Pass ? "Pass" : $"{Card.Name} {Type} {TypeSpecialAbility}";
+            return Pass ? "Pass" : $"{Card.Name} {Type}";
         }
     }
 
@@ -69,16 +78,19 @@ public abstract class OpponentBaseUtils : Player
         
         foreach (Card c in Hand)
         {
+            if (c.IsSpecialAbility)
+            {
+                foreach (Row.RowTypes t in Enum.GetValues(typeof(Row.RowTypes)))
+                {
+                    workingList.Add(new Move(c, Card.Types.SpecialAbility, t));
+                }
+
+                continue;
+            }
             foreach (Card.Types t in Card.GetPossibleTypes(c))
             {
-                if (c.IsSpecialAbility)
                 {
-                    workingList.AddRange(from rowType in (Row.RowTypes[]) Enum.GetValues(typeof(Row.RowTypes)) 
-                        select new Move(c, t, rowType));
-                }
-                else
-                {
-                    workingList.Add(new Move(c, t, Row.RowTypes.Melee));
+                    workingList.Add(new Move(c, t));
                 }
             }
         }
@@ -96,6 +108,6 @@ public abstract class OpponentBaseUtils : Player
             return;
         }
 
-        PlayCard(m.Card, m.Type, () => m.TypeSpecialAbility);
+        PlayCard(m.Card, m.Type, () => m.RowType);
     }
 }

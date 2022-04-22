@@ -32,10 +32,21 @@ public class OpponentTrueAi : OpponentBaseUtils
     // apparently you can do this
     private readonly Random _rand = new(Guid.NewGuid().GetHashCode());
 
-    // note - this is not a true clone -- weightCoefficients list is adjusted by a random amount to get a similiar deck
+    // note - this is not a true clone -- weightCoefficients list is adjusted by a random amount to get a similar deck
     private OpponentTrueAi(OpponentTrueAi toCopy) : base(toCopy)
     {
-        _weightCoefficients = GetCoefficientsWDeviance(toCopy._weightCoefficients, _generations < 10 ? 100f : 20f);
+        try
+        {
+            FileInfo fileInfo = GetLastFile();
+            _weightCoefficients = int.Parse(fileInfo.Name.Substring(0, fileInfo.Name.Length -
+                                                                       DataTargetFileEnding.Length)) > _generations ? 
+                GetLastCoefficients() : 
+                GetCoefficientsWDeviance(toCopy._weightCoefficients, _generations < 10 ? 100f : 20f);
+        }
+        catch (IOException)
+        {
+            _weightCoefficients = GetCoefficientsWDeviance(toCopy._weightCoefficients, _generations < 10 ? 100f : 20f);
+        }
     }
 
     public OpponentTrueAi(GameInstance game, GameInstance.PlayerType type, IEnumerable<Card> deck) : base(game, type,
@@ -51,7 +62,7 @@ public class OpponentTrueAi : OpponentBaseUtils
             Console.WriteLine("\nNo previous data found, using default coefficients\n");
             
             // deviance is added so that starting weightCoefficients are not all the same
-            _weightCoefficients = GetCoefficientsWDeviance(GetStartingCoefficents(), 0.2f);
+            _weightCoefficients = GetCoefficientsWDeviance(GetStartingCoefficents(), 5f);
         }
     }
 
@@ -62,7 +73,20 @@ public class OpponentTrueAi : OpponentBaseUtils
     }
 
     // throws IOException if file not found
-    private List<List<float>> GetLastCoefficients()
+    private List<List<float>> GetLastCoefficients() {
+        FileInfo lastFile = GetLastFile();
+        
+        _generations = int.Parse(lastFile.Name.Substring(0, lastFile.Name.Length - 
+                                                            DataTargetFileEnding.Length));
+
+        Console.WriteLine("Generations: " + _generations);
+        
+        string data = File.ReadAllText(lastFile.FullName);
+
+        return JsonSerializer.Deserialize<List<List<float>>>(data);
+    }
+    
+    private FileInfo GetLastFile()
     {
         DirectoryInfo directoryInfo = new DirectoryInfo(DataSourcePath);
         FileInfo[] files = directoryInfo.GetFiles("*.json");
@@ -73,16 +97,8 @@ public class OpponentTrueAi : OpponentBaseUtils
         }
 
         FileInfo lastFile = files.OrderByDescending(f => f.LastWriteTime).First();
-        
-        _generations = int.Parse(lastFile.Name.Substring(0, lastFile.Name.Length - 
-                                                         DataTargetFileEnding.Length));
 
-        Console.WriteLine("Generations: " + _generations);
-        
-        
-        string data = File.ReadAllText(lastFile.FullName);
-
-        return JsonSerializer.Deserialize<List<List<float>>>(data);
+        return lastFile;
     }
 
     private static List<List<float>> GetStartingCoefficents()
@@ -249,10 +265,10 @@ public class OpponentTrueAi : OpponentBaseUtils
             workingBest = (OpponentTrueAi) g.Winner;
             _generations++;
             
-            if (_generations % 10 != 0)
-            {
-                continue;
-            }
+            // if (_generations % 10 != 0)
+            // {
+            //     continue;
+            // }
 
             workingBest.WriteData(_generations);
 

@@ -194,14 +194,14 @@ public class OpponentAI : OpponentBaseUtils
             {
                 if (c.IsSpecialAbility)
                 {
-                    foreach (Row.RowTypes rowType in (Row.RowTypes[]) Enum.GetValues(typeof(Row.RowTypes)))
-                    {
-                        DeepMoveAdd(c, t, rowType, ref moveChainsToAnalyze);
-                    }
+                    // foreach (Row.RowTypes rowType in (Row.RowTypes[]) Enum.GetValues(typeof(Row.RowTypes)))
+                    // {
+                        DeepMoveAdd(c, t, ref moveChainsToAnalyze);
+                    // }
                 }
                 else
                 {
-                    DeepMoveAdd(c, t, Row.RowTypes.Melee, ref moveChainsToAnalyze);
+                    DeepMoveAdd(c, t, ref moveChainsToAnalyze);
                 }
             }
         }
@@ -212,10 +212,10 @@ public class OpponentAI : OpponentBaseUtils
         return sortedMoveChains.Any() ? sortedMoveChains : new List<Move> {Move.PassConst};
     }
 
-    private void DeepMoveAdd(Card c, Card.Types t, Row.RowTypes rowType,
+    private void DeepMoveAdd(Card c, Card.Types t,
         ref List<List<Move>> moveChainsToAnalyze)
     {
-        Move m = new Move(c, t, rowType);
+        Move m = new Move(c, t);
 
         // everything from here on out should specifically be objects in gDelta aside from noted exceptions that are
         // constant for all instances of cloned classes (e.g. PlayerType)
@@ -278,8 +278,7 @@ public class OpponentAI : OpponentBaseUtils
 
         Card starter = Hand.First();
 
-        Move bestMove = new Move(starter, Card.GetPossibleTypes(starter).First(),
-            Row.RowTypes.Melee);
+        Move bestMove = new Move(starter, Card.GetPossibleTypes(starter).First());
 
         int bestValue = GetPossibleValueDifference(bestMove);
 
@@ -289,14 +288,14 @@ public class OpponentAI : OpponentBaseUtils
             {
                 if (c.IsSpecialAbility)
                 {
-                    foreach (Row.RowTypes rowType in (Row.RowTypes[]) Enum.GetValues(typeof(Row.RowTypes)))
-                    {
-                        CheckMove(c, t, rowType, condition, ref bestValue, ref bestMove);
-                    }
+                    // foreach (Row.RowTypes rowType in (Row.RowTypes[]) Enum.GetValues(typeof(Row.RowTypes)))
+                    // {
+                        CheckMove(c, t, condition, ref bestValue, ref bestMove);
+                    // }
                 }
                 else
                 {
-                    CheckMove(c, t, Row.RowTypes.Melee, condition, ref bestValue, ref bestMove);
+                    CheckMove(c, t, condition, ref bestValue, ref bestMove);
                 }
             }
         }
@@ -310,10 +309,10 @@ public class OpponentAI : OpponentBaseUtils
         return bestMove;
     }
 
-    private void CheckMove(Card c, Card.Types t, Row.RowTypes rowType, Func<int, int, bool> condition,
+    private void CheckMove(Card c, Card.Types t, Func<int, int, bool> condition,
         ref int bestValue, ref Move bestMove)
     {
-        Move m = new Move(c, t, rowType);
+        Move m = new Move(c, t);
         int workingValue = GetPossibleValueDifference(m);
         if (condition.Invoke(bestValue, workingValue))
         {
@@ -324,16 +323,16 @@ public class OpponentAI : OpponentBaseUtils
 
     private int GetPossibleValueDifference(Move m)
     {
-        return GetPossibleValueDifference(m.Card, m.Type, m.TypeSpecialAbility);
+        return GetPossibleValueDifference(m.Card, m.Type);
     }
 
     // pure
-    private int GetPossibleValueDifference(Card c, Card.Types type, Row.RowTypes rowType)
+    private int GetPossibleValueDifference(Card c, Card.Types type)
     {
         // game instance with the possible change
         GameInstance gDelta = new GameInstance(GameInstance);
 
-        gDelta.Players[PlayerType].PlayCard(c.Clone, type, () => rowType);
+        gDelta.Players[PlayerType].PlayCard(c.Clone, type, () => (Row.RowTypes) type);
 
         return gDelta.Players[PlayerType].Value - gDelta.Players[GameInstance.OpponentOf(PlayerType)].Value;
     }

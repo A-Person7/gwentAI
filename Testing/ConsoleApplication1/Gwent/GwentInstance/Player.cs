@@ -36,14 +36,14 @@ public class Player : IHashable
         };
     }
     
-    [HashField]
+    [HashFieldAttribute]
     public bool Passed { get; set; }
 
     // not readonly because it will need to be modified in the gameinstance copy constructor
     public GameInstance GameInstance;
-    [HashField]
+    [HashFieldAttribute]
     public readonly GameInstance.PlayerType PlayerType;
-    [HashField]
+    [HashFieldAttribute]
     public int Value => Rows.Values.Sum(r => r.Value);
 
     [HashList]

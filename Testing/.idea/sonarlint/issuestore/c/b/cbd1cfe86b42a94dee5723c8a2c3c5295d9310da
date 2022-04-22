@@ -1,7 +1,0 @@
-
-|csharpsquid:S3776Œ"RRefactor this method to reduce its Cognitive Complexity from 20 to the 15 allowed.(¾«Óšûÿÿÿÿ8ºëŒÔ„0
-Ocsharpsquid:S1862¥"+This branch duplicates the one on line 161.(‹îïv8»ëŒÔ„0
-\csharpsquid:S2190İ"2Add a way to break out of this method's recursion.(šé‡ûÿÿÿÿ8»ëŒÔ„0
-ycsharpsquid:S2696M"UMake the enclosing instance method 'static' or remove this set on the 'static' field.(õø…Ş8•½ˆÔ„0
-Xcsharpsquid:S1135"4Complete the task associated to this 'TODO' comment.(îæÃ®8ı²‘Ó„0
-Ycsharpsquid:S1135"4Complete the task associated to this 'TODO' comment.(È  »8¼ëŒÔ„0

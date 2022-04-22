@@ -59,7 +59,7 @@ public abstract class Card : IHashable
     // should never return true if the card has any other abilities
     public bool IsHero => Abilities == AbilityTypes.Hero;
     
-    [HashField]
+    [field: HashField]
     public Types Type { get; set; }
 
     [HashField]
