@@ -47,21 +47,26 @@ public static class AiUtils
                 _ => null
             };
             
-            workingHash += value switch
-            {
-                IHashable iHashable => iHashable.GetAiHash(),
-                IEnumerable<IHashable> hashList => GetAiHash(hashList),
-                    
-                IDictionary dictionary => GetAiHash(dictionary.Values.Cast<IHashable>().ToList()),
-                
-                null => 0,
-                not null => value.GetHashCode()
-            } * (long) Math.Pow(31, workingExponent);
+            workingHash += GetHashOf(value) * (long) Math.Pow(31, workingExponent);
 
             workingExponent++;
         }
 
         return workingHash;
+    }
+
+    public static long GetHashOf(object value)
+    {
+        return value switch
+        {
+            IHashable iHashable => iHashable.GetAiHash(),
+            IEnumerable<IHashable> hashList => GetAiHash(hashList),
+
+            IDictionary dictionary => GetAiHash(dictionary.Values.Cast<IHashable>().ToList()),
+
+            null => 0,
+            not null => value.GetHashCode()
+        };
     }
 }
 

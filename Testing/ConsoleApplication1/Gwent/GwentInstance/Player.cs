@@ -38,7 +38,7 @@ public class Player : IHashable
     
     protected Player Opponent => GameInstance.Players[GameInstance.OpponentOf(PlayerType)];
     
-    [HashFieldAttribute]
+    [HashField]
     public bool Passed { get; set; }
 
     private GameInstance _gameInstance;
@@ -58,10 +58,14 @@ public class Player : IHashable
             _gameInstance = value;
         }
     }
-    [HashFieldAttribute]
+    [HashField]
     public readonly GameInstance.PlayerType PlayerType;
-    [HashFieldAttribute]
+    [HashField]
     public int Value => Rows.Values.Sum(r => r.Value);
+    
+    // just here so the ai pays more attention to this (hopefully)
+    [HashField]
+    private int HandSize => Hand.Count;
 
     [HashField]
     public Dictionary<Row.RowTypes, Row> Rows { get; set; }

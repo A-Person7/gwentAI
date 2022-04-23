@@ -27,16 +27,14 @@ public static class Program
 
         List<Card> opponentCards = new List<Card>
         {
-            new PoorFuckingInfantry(),
-            new PoorFuckingInfantry(),
-            new PoorFuckingInfantry(),
             new BirnaBran(),
             new BitingFrost(),
-            new CirillaFionaElenRiannon(),
             new Cow(),
             new CommandersHorn(),
             new CommandersHorn(),
-            new BitingFrost()
+            new BitingFrost(),
+            new Olaf(),
+            new BovineDefenseForce()
         };
 
         OpponentTrueAi.Simulate(playerCards, opponentCards);

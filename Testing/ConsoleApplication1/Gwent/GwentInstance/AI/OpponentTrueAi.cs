@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Threading;
+using ConsoleApplication1.AIComponents;
+using MoreLinq;
 
 namespace ConsoleApplication1.Gwent.GwentInstance.AI;
 
@@ -12,8 +15,7 @@ namespace ConsoleApplication1.Gwent.GwentInstance.AI;
 /// </summary>
 public class OpponentTrueAi : OpponentBaseUtils
 {
-    // only copies should technically be deviated from
-    private readonly List<List<float>> _weightCoefficients;
+    private readonly Network<Move> _network;
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -22,32 +24,30 @@ public class OpponentTrueAi : OpponentBaseUtils
         ReadCommentHandling = JsonCommentHandling.Skip,
         WriteIndented = true
     };
-    
+
     private const string DataTargetPath = "ConsoleApplication1/Gwent/GwentInstance/AI/Target/";
     private const string DataSourcePath = DataTargetPath;
     private const string DataTargetFileEnding = "_round.json";
     private static int _generations;
 
-    // TODO - update random method
-    // apparently you can do this
-    private readonly Random _rand = new(Guid.NewGuid().GetHashCode());
-
     // note - this is not a true clone -- weightCoefficients list is adjusted by a random amount to get a similar deck
     private OpponentTrueAi(OpponentTrueAi toCopy) : base(toCopy)
     {
         float randDeviance = _generations < 10 ? 300f : 20f;
-        
+        // morelinq
+        Deck = Deck.Shuffle().ToList();
+
         try
         {
             FileInfo fileInfo = GetLastFile();
-            _weightCoefficients = int.Parse(fileInfo.Name.Substring(0, fileInfo.Name.Length -
-                                                                       DataTargetFileEnding.Length)) > _generations ? 
-                GetLastCoefficients() : 
-                GetCoefficientsWDeviance(toCopy._weightCoefficients, randDeviance);
+            _network = int.Parse(fileInfo.Name.Substring(0, fileInfo.Name.Length -
+                                                            DataTargetFileEnding.Length)) > _generations
+                ? GetLastNetwork()
+                : toCopy._network.CloneWithDeviance(randDeviance);
         }
         catch (IOException)
         {
-            _weightCoefficients = GetCoefficientsWDeviance(toCopy._weightCoefficients, randDeviance);
+            _network = toCopy._network.CloneWithDeviance(randDeviance);
         }
     }
 
@@ -56,39 +56,44 @@ public class OpponentTrueAi : OpponentBaseUtils
     {
         try
         {
-            _weightCoefficients = GetLastCoefficients();
+            _network = GetLastNetwork();
             Console.WriteLine("\nLoading coefficients...\n");
         }
         catch (IOException)
         {
             Console.WriteLine("\nNo previous data found, using default coefficients\n");
-            
+
             // deviance is added so that starting weightCoefficients are not all the same
-            _weightCoefficients = GetCoefficientsWDeviance(GetStartingCoefficents(), 5f);
+            _network = GetStartingNetwork().CloneWithDeviance(5f);
         }
     }
 
     public OpponentTrueAi(GameInstance game, GameInstance.PlayerType type, IEnumerable<Card> deck,
-        List<List<float>> weightCoefficients) : base(game, type, deck)
+        Network<Move> network) : base(game, type, deck)
     {
-        _weightCoefficients = weightCoefficients;
+        _network = network;
+    }
+
+    private static void SetGenerations(int generations)
+    {
+        _generations = generations;
     }
 
     // throws IOException if file not found
-    private List<List<float>> GetLastCoefficients() {
+    private static Network<Move> GetLastNetwork()
+    {
         FileInfo lastFile = GetLastFile();
-        
-        _generations = int.Parse(lastFile.Name.Substring(0, lastFile.Name.Length - 
-                                                            DataTargetFileEnding.Length));
 
-        Console.WriteLine("Generations: " + _generations);
-        
+        SetGenerations(int.Parse(lastFile.Name[..^DataTargetFileEnding.Length]));
+
+        Console.WriteLine($"Generations: {_generations}");
+
         string data = File.ReadAllText(lastFile.FullName);
 
-        return JsonSerializer.Deserialize<List<List<float>>>(data);
+        return JsonSerializer.Deserialize<Network<Move>>(data);
     }
-    
-    private FileInfo GetLastFile()
+
+    private static FileInfo GetLastFile()
     {
         DirectoryInfo directoryInfo = new DirectoryInfo(DataSourcePath);
         FileInfo[] files = directoryInfo.GetFiles("*.json");
@@ -103,32 +108,37 @@ public class OpponentTrueAi : OpponentBaseUtils
         return lastFile;
     }
 
-    private static List<List<float>> GetStartingCoefficents()
+    private static Network<Move> GetStartingNetwork()
     {
-        List<List<float>> workingList = new List<List<float>>();
-
-        // first list should include weightCoefficients for every part of a card that effects play
-        // second list should 
-
         // v is starting value
-        float v = 0.75f;
+        float v = 1f;
 
-        int[] startingShape = {2, 3, 2};
+        int[] startingShape = {5, 10, 10, GetAllMoves().Count};
 
-        foreach (int i in startingShape)
+        List<List<Node>> workingNodes = new List<List<Node>>();
+        List<Node> emptyNodeList = new List<Node>();
+
+        for (int i = 0; i < startingShape.Length; i++)
         {
-            List<float> l = new List<float>();
-            for (int j = 0; j < i; j++)
+            workingNodes.Add(new List<Node>());
+            for (int j = 0; j < startingShape[i]; j++)
             {
-                l.Add(v);
+                workingNodes[i].Add(new Node(emptyNodeList, v));
             }
-
-            workingList.Add(l);
         }
 
-        return workingList;
+        // don't set the last layer
+        for (int i = 0; i < workingNodes.Count - 1; i++)
+        {
+            foreach (Node n in workingNodes[i])
+            {
+                n.SetTargets(workingNodes[i + 1]);
+            }
+        }
+
+        return new Network<Move>(GetAllMoves(), workingNodes);
     }
-    
+
     public override void OnTurn()
     {
         if (Passed)
@@ -136,107 +146,33 @@ public class OpponentTrueAi : OpponentBaseUtils
             return;
         }
 
-        if (Opponent.Passed && Value > Opponent.Value)
-        {
-            // you win
-            Pass();
-            return;
-        }
+        // if (Opponent.Passed && Value > Opponent.Value)
+        // {
+        //     // you win
+        //     Pass();
+        //     return;
+        // }
         
-        // morelinq
-        Move m = GetPossibleMoves().MaxBy(MoveToStrength);
+        Move m = _network.GetOutput(DataAsList(), GetPossibleMoves(), Move.PassConst);
+        Console.WriteLine($"{m}");
         Play(m);
     }
 
-    private float MoveToStrength(Move m)
+    private List<double> DataAsList()
     {
-        float workingValue = MoveInContext(m);
-        float lastValue = workingValue;
-
-        foreach (float workingLocalValue in _weightCoefficients
-                     .Select(list => list.Sum(f => f * lastValue)))
+        return new List<double>
         {
-            lastValue = workingLocalValue;
-            workingValue += workingLocalValue;
-        }
-
-        Console.WriteLine("Move: " + m + " has initial strength in context: " + workingValue);
-        
-        return workingValue;
-    }
-
-    // gets the move in the context of this player, the current opponent, and game instance
-    private float MoveInContext(Move m)
-    {
-        return AiUtils.GetAiHash(GameInstance, GameInstance.Players[GameInstance.OpponentOf(PlayerType)],  
-                this, m);
-    }
-
-    // note - must be pure with respect to prev weightCoefficients
-    private List<List<float>> GetCoefficientsWDeviance(List<List<float>> prevCoefficients, float maxDeviance)
-    {
-        List<List<float>> workingCoefficients = new List<List<float>>();
-
-        // TODO - implement adding/removing nodes and adding/removing columns
-
-        foreach (List<float> listCoefficients in prevCoefficients)
-        {
-            List<float> workingList = new List<float>();
-            foreach (float f in listCoefficients)
-            {
-                workingList.Add(f + (float) (_rand.NextDouble() - 0.5)
-                    * maxDeviance * 2 - maxDeviance);
-
-                if (_rand.NextDouble() <= 0.925)
-                {
-                    continue;
-                }
-
-                if (_rand.NextDouble() > 0.5)
-                {
-                    if (_rand.NextDouble() > 0.5)
-                    {
-                        workingList.Add(-0.5f);
-                    }
-                    else if (_rand.NextDouble() > 0.5)
-                    {
-                        workingList.Add(0.5f);
-                    }
-                }
-                else
-                {
-                    workingList.Remove(f);
-                }
-            }
-
-            workingCoefficients.Add(workingList);
-
-            if (_rand.NextDouble() <= 0.975)
-            {
-                continue;
-            }
-
-            if (_rand.NextDouble() > 0.5)
-            {
-                workingCoefficients.Add(new List<float>
-                {
-                    (float) _rand.NextDouble(),
-                    (float) _rand.NextDouble(),
-                    (float) _rand.NextDouble(),
-                });
-            }
-            else if (workingCoefficients.Count > 2)
-            {
-                workingCoefficients.RemoveAt(workingCoefficients.Count - 1);
-            }
-        }
-
-        return workingCoefficients;
+            GetAiHash(),
+            Opponent.GetAiHash(),
+            AiUtils.GetHashOf(Hand),
+            AiUtils.GetHashOf(Rows.Values),
+            GameInstance.GetAiHash()
+        };
     }
 
     private string GetDataOut()
     {
-        return JsonSerializer.Serialize(_weightCoefficients, JsonOptions);
+        return JsonSerializer.Serialize(_network, JsonOptions);
     }
 
     private void WriteData(int generation)
@@ -257,8 +193,9 @@ public class OpponentTrueAi : OpponentBaseUtils
     public static void Simulate(List<Card> playerDeck, List<Card> opponentDeck)
     {
         OpponentTrueAi workingBest = new OpponentTrueAi(null, GameInstance.PlayerType.Player, playerDeck);
-        
-        while (true)
+
+        // technically makes this killable
+        while (Thread.CurrentThread.IsAlive)
         {
             GameInstance g = new GameInstance(playerDeck, opponentDeck)
             {
@@ -275,13 +212,13 @@ public class OpponentTrueAi : OpponentBaseUtils
                 new List<Card>(opponentDeck.Select(c => c.Clone).ToList());
 
             g.Players[GameInstance.PlayerType.Player].GameInstance = g;
-            g.Players[GameInstance.PlayerType.Player].Deck = 
+            g.Players[GameInstance.PlayerType.Player].Deck =
                 new List<Card>(playerDeck.Select(c => c.Clone).ToList());
 
             g.Play();
 
             Console.WriteLine("\nTies: " + g.NumTies() + "\n");
-            
+
             if (g.NumTies() >= 2)
             {
                 continue;
@@ -289,7 +226,7 @@ public class OpponentTrueAi : OpponentBaseUtils
 
             workingBest = (OpponentTrueAi) g.Winner;
             _generations++;
-            
+
             // if (_generations % 10 != 0)
             // {
             //     continue;

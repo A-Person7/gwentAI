@@ -16,9 +16,6 @@ public class OpponentAI : OpponentBaseUtils
 
     private List<Move> PrevMoves { get; set; }
 
-    private Player Opponent => GameInstance.Players[OpponentType];
-
-
     public OpponentAI(GameInstance game, GameInstance.PlayerType type, List<Card> deck) : base(game, type, deck)
     {
         Depth = 5;

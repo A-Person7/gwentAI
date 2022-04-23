@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ConsoleApplication1.Gwent.GwentInstance.AI;
 
@@ -16,8 +18,7 @@ public abstract class OpponentBaseUtils : Player
 
     public sealed class Move : IHashable
     {
-        public static readonly Move PassConst =
-            new Move(null, Card.Types.Melee);
+        public static readonly Move PassConst = new(null, Card.Types.Melee);
 
         // note - the type is treated as both the type of the card for general cards and the row to play a special
         // ability card in
@@ -45,17 +46,12 @@ public abstract class OpponentBaseUtils : Player
         
         public Move GetClone()
         {
-            if (Pass)
-            {
-                return PassConst;
-            }
-
-            return new Move(Card.Clone, Type, RowType);
+            return Pass ? PassConst : new Move(Card.Clone, Type, RowType);
         }
         
         public long GetAiHash()
         {
-            return AiUtils.HashInternalElements(this);
+            return Pass ? short.MaxValue : AiUtils.HashInternalElements(this);
         }
 
         // from when Move was a Record
@@ -70,34 +66,66 @@ public abstract class OpponentBaseUtils : Player
         {
             return Pass ? "Pass" : $"{Card.Name} {Type}";
         }
-    }
 
+        private bool Equals(Move other)
+        {
+            return other.Pass != Pass
+                   || Card.GetType() == other.Card.GetType() 
+                   && Type == other.Type 
+                   && RowType == other.RowType;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return ReferenceEquals(this, obj) || obj is Move other && Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Card, (int) Type, (int) RowType);
+        }
+    }
+   
+    
     protected List<Move> GetPossibleMoves()
+    {
+        return GetPossibleMoves(Hand);
+    }
+    
+    private static List<Move> GetPossibleMoves(IEnumerable cards)
     {
         List<Move> workingList = new List<Move>();
         
-        foreach (Card c in Hand)
+        foreach (Card c in cards)
         {
             if (c.IsSpecialAbility)
             {
-                foreach (Row.RowTypes t in Enum.GetValues(typeof(Row.RowTypes)))
-                {
-                    workingList.Add(new Move(c, Card.Types.SpecialAbility, t));
-                }
+                workingList.AddRange
+                (from Row.RowTypes t in Enum.GetValues(typeof(Row.RowTypes)) 
+                    select new Move(c, Card.Types.SpecialAbility, t));
 
                 continue;
             }
-            foreach (Card.Types t in Card.GetPossibleTypes(c))
-            {
-                {
-                    workingList.Add(new Move(c, t));
-                }
-            }
+
+            workingList.AddRange(Card.GetPossibleTypes(c).Select(t => new Move(c, t)));
         }
 
         workingList.Add(Move.PassConst);
 
         return workingList;
+    }
+
+    protected static Dictionary<int, Move> GetAllMoves()
+    {
+        List<Move> allMoves = GetPossibleMoves(CardStorer.Cards);
+        Dictionary<int, Move> workingDictionary = new Dictionary<int, Move>();
+
+        for (int i = 0; i < allMoves.Count; i++)
+        {
+            workingDictionary.Add(i, allMoves[i]);
+        }
+
+        return workingDictionary;
     }
     
     protected void Play(Move m)
