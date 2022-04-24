@@ -5,41 +5,42 @@ namespace ConsoleApplication1.AIComponents;
 
 public class Node
 {
-    private List<Node> _targets;
-    private double _sum;
-    private readonly double _multiplier;
+    private List<Link> Targets { get; set; }
 
-    public double Multiplier => _multiplier;
-
-    public void AcceptData(double data)
+    public void Accept(double data)
     {
-        _sum += data * _multiplier;
+        Strength += data;
     }
 
     public void SendToTargets()
     {
-        _targets.ForEach(t => t.AcceptData(_sum));
-        _sum = 0;
+        Targets.ForEach(t => t.Send(Strength));
+        Strength = 0;
     }
     
-    public void SetTargets(List<Node> targets)
+    public void SetLinks(List<Link> targets)
     {
-        _targets = targets;
+        Targets = targets;
     }
 
-    public double Strength => _sum;
+    public double Strength { get; private set; }
 
-    public bool IsEndNode => !_targets.Any();
+    public bool IsEndNode => !Targets.Any();
 
-    public Node(List<Node> targets, double multiplier)
+    public Node(List<Link> targets)
     {
-        _sum = 0;
-        _targets = targets;
-        _multiplier = multiplier;
+        Strength = 0;
+        Targets = targets;
     }
 
-    public Node CloneWithDeviance(List<Node> targets, double deviance)
+    public Node()
     {
-        return new Node(_targets, _multiplier + deviance);
+        Strength = 0;
+        Targets = new List<Link>();
+    }
+
+    public Node Clone()
+    {
+        return new Node(Targets);
     }
 }

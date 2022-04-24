@@ -27,10 +27,10 @@ public class OpponentTrueAi : OpponentBaseUtils
 
     private const string DataTargetPath = "ConsoleApplication1/Gwent/GwentInstance/AI/Target/";
     private const string DataSourcePath = DataTargetPath;
-    private const string DataTargetFileEnding = "_round.json";
+    private const string DataTargetFileEnding = "_generation.json";
     private static int _generations;
 
-    // note - this is not a true clone -- weightCoefficients list is adjusted by a random amount to get a similar deck
+    // note - this is not a true clone -- the network is adjusted by a random amount to get a similar deck
     private OpponentTrueAi(OpponentTrueAi toCopy) : base(toCopy)
     {
         float randDeviance = _generations < 10 ? 300f : 20f;
@@ -40,14 +40,13 @@ public class OpponentTrueAi : OpponentBaseUtils
         try
         {
             FileInfo fileInfo = GetLastFile();
-            _network = int.Parse(fileInfo.Name.Substring(0, fileInfo.Name.Length -
-                                                            DataTargetFileEnding.Length)) > _generations
+            _network = int.Parse(fileInfo.Name[..^DataTargetFileEnding.Length]) > _generations
                 ? GetLastNetwork()
-                : toCopy._network.CloneWithDeviance(randDeviance);
+                : new Network<Move>(toCopy._network, randDeviance);
         }
         catch (IOException)
         {
-            _network = toCopy._network.CloneWithDeviance(randDeviance);
+            _network = new Network<Move>(toCopy._network, randDeviance);
         }
     }
 
@@ -64,7 +63,7 @@ public class OpponentTrueAi : OpponentBaseUtils
             Console.WriteLine("\nNo previous data found, using default coefficients\n");
 
             // deviance is added so that starting weightCoefficients are not all the same
-            _network = GetStartingNetwork().CloneWithDeviance(5f);
+            _network = new Network<Move>(GetStartingNetwork(), 2.5);
         }
     }
 
@@ -110,29 +109,16 @@ public class OpponentTrueAi : OpponentBaseUtils
 
     private static Network<Move> GetStartingNetwork()
     {
-        // v is starting value
-        float v = 1f;
-
-        int[] startingShape = {5, 10, 10, GetAllMoves().Count};
+        int[] startingShape = {3, 7, 8, GetAllMoves().Count};
 
         List<List<Node>> workingNodes = new List<List<Node>>();
-        List<Node> emptyNodeList = new List<Node>();
 
         for (int i = 0; i < startingShape.Length; i++)
         {
             workingNodes.Add(new List<Node>());
             for (int j = 0; j < startingShape[i]; j++)
             {
-                workingNodes[i].Add(new Node(emptyNodeList, v));
-            }
-        }
-
-        // don't set the last layer
-        for (int i = 0; i < workingNodes.Count - 1; i++)
-        {
-            foreach (Node n in workingNodes[i])
-            {
-                n.SetTargets(workingNodes[i + 1]);
+                workingNodes[i].Add(new Node());
             }
         }
 
@@ -146,27 +132,26 @@ public class OpponentTrueAi : OpponentBaseUtils
             return;
         }
 
-        // if (Opponent.Passed && Value > Opponent.Value)
-        // {
-        //     // you win
-        //     Pass();
-        //     return;
-        // }
+        // TODO - consider removing
+        if (Opponent.Passed && Value > Opponent.Value)
+        {
+            // you win
+            Pass();
+            return;
+        }
         
         Move m = _network.GetOutput(DataAsList(), GetPossibleMoves(), Move.PassConst);
         Console.WriteLine($"{m}");
         Play(m);
     }
 
-    private List<double> DataAsList()
+    private IEnumerable<double> DataAsList()
     {
         return new List<double>
         {
-            GetAiHash(),
-            Opponent.GetAiHash(),
-            AiUtils.GetHashOf(Hand),
-            AiUtils.GetHashOf(Rows.Values),
-            GameInstance.GetAiHash()
+            Hand.Count,
+            Value,
+            Opponent.Value,
         };
     }
 
@@ -190,6 +175,7 @@ public class OpponentTrueAi : OpponentBaseUtils
     }
 
     // pure (in theory)
+    // TODO - move to utility method
     public static void Simulate(List<Card> playerDeck, List<Card> opponentDeck)
     {
         OpponentTrueAi workingBest = new OpponentTrueAi(null, GameInstance.PlayerType.Player, playerDeck);
