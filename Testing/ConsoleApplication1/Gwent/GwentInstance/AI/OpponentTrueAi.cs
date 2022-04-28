@@ -33,8 +33,8 @@ public class OpponentTrueAi : OpponentBaseUtils
     // note - this is not a true clone -- the network is adjusted by a random amount to get a similar deck
     private OpponentTrueAi(OpponentTrueAi toCopy) : base(toCopy)
     {
-        float randDeviance = _generations < 10 ? 300f : 20f;
-        // morelinq
+        float randDeviance = _generations < 10 ? 32f : 5f;
+        // more linq
         Deck = Deck.Shuffle().ToList();
 
         try
@@ -97,6 +97,7 @@ public class OpponentTrueAi : OpponentBaseUtils
         DirectoryInfo directoryInfo = new DirectoryInfo(DataSourcePath);
         FileInfo[] files = directoryInfo.GetFiles("*.json");
 
+        // TODO - do something quicker than throwing an exception
         if (files.Length == 0)
         {
             throw new FileNotFoundException("No files found");
@@ -109,7 +110,8 @@ public class OpponentTrueAi : OpponentBaseUtils
 
     private static Network<Move> GetStartingNetwork()
     {
-        int[] startingShape = {3, 7, 8, GetAllMoves().Count};
+        // first value must be the same as the number of values in DataAsList
+        int[] startingShape = {NumInputs, 45, 40, GetAllMoves().Count};
 
         List<List<Node>> workingNodes = new List<List<Node>>();
 
@@ -132,28 +134,72 @@ public class OpponentTrueAi : OpponentBaseUtils
             return;
         }
 
-        // TODO - consider removing
-        if (Opponent.Passed && Value > Opponent.Value)
-        {
-            // you win
-            Pass();
-            return;
-        }
+        // // TODO - consider removing
+        // if (Opponent.Passed && Value > Opponent.Value)
+        // {
+        //     // you win
+        //     Pass();
+        //     return;
+        // }
+        
+        Console.WriteLine($"{PlayerType}'s turn");
+        // write all the names of the cards in your hand
+        Console.WriteLine($"Your hand: {string.Join(", ", Deck.Select(c => c.Name))}");
         
         Move m = _network.GetOutput(DataAsList(), GetPossibleMoves(), Move.PassConst);
         Console.WriteLine($"{m}");
         Play(m);
     }
 
+    // TODO - use a ton of heuristics and compare previous data to see what can be kept the same
+    // note - must be the same length as the first number of starting shape in GetStartingNetwork
     private IEnumerable<double> DataAsList()
     {
-        return new List<double>
+        List<double> cardList = new List<double>();
+        
+        for (int i = 0; i < NumCardsStartingHand; i++)
+        {
+            if (i < Hand.Count)
+            {
+                Card c = Hand[i];
+                cardList.Add(c.Value);
+                cardList.Add(c.IsHero ? -1 : 1);
+                cardList.Add(c.Agile ? -1 : 1);
+                cardList.Add(c.IsMelee ? -1 : 1);
+                cardList.Add(c.IsSiege ? -1 : 1);
+                cardList.Add(c.IsSpecialAbility ? -1 : 1);
+                cardList.Add(c.IsWeather ? -1 : 1);
+                cardList.Add(c.TightBond ? -1 : 1);
+                cardList.Add(c.Medic ? -1 : 1);
+                cardList.Add(c.MoraleBoost ? -1 : 1);
+                continue;
+            }
+
+            // loop the amount of card properties are added to the list
+            for (int j = 0; j < 10; j++)
+            {
+                cardList.Add(0);
+            }
+        }
+        
+        return new List<double>(cardList)
         {
             Hand.Count,
             Value,
             Opponent.Value,
+            Value - Opponent.Value * 20,
+            Opponent.Passed ? -1 : 1,
+            Rows[Row.RowTypes.Melee].Value,
+            Rows[Row.RowTypes.Ranged].Value,
+            Rows[Row.RowTypes.Siege].Value,
+            Opponent.Rows[Row.RowTypes.Melee].Value,
+            Opponent.Rows[Row.RowTypes.Ranged].Value,
+            Opponent.Rows[Row.RowTypes.Siege].Value
         };
     }
+
+    // note - must be the same as the length of the list from GetDataAsList
+    private const int NumInputs = 10*NumCardsStartingHand + 11;
 
     private string GetDataOut()
     {

@@ -28,8 +28,8 @@ public abstract class OpponentBaseUtils : Player
             Type = type;
             RowType = rowTypes;
         }
-        
-        public Move (Card card, Card.Types type)
+
+        public Move(Card card, Card.Types type)
         {
             Card = card;
             Type = type;
@@ -37,18 +37,15 @@ public abstract class OpponentBaseUtils : Player
         }
 
         public bool Pass => Card == null;
-        [HashField]
-        public Card Card { get; init; }
-        [HashField]
-        public Card.Types Type { get; init; }
-        [HashField]
-        public Row.RowTypes RowType { get; init; }
-        
+        [HashField] public Card Card { get; init; }
+        [HashField] public Card.Types Type { get; init; }
+        [HashField] public Row.RowTypes RowType { get; init; }
+
         public Move GetClone()
         {
             return Pass ? PassConst : new Move(Card.Clone, Type, RowType);
         }
-        
+
         public long GetAiHash()
         {
             return Pass ? short.MaxValue : AiUtils.HashInternalElements(this);
@@ -69,10 +66,11 @@ public abstract class OpponentBaseUtils : Player
 
         private bool Equals(Move other)
         {
-            return other.Pass != Pass
-                   || Card.GetType() == other.Card.GetType() 
-                   && Type == other.Type 
-                   && RowType == other.RowType;
+            return other.Pass && Pass
+                   || !Pass && !other.Pass
+                            && Card.GetType() == other.Card.GetType()
+                            && Type == other.Type
+                            && RowType == other.RowType;
         }
 
         public override bool Equals(object obj)
@@ -85,23 +83,23 @@ public abstract class OpponentBaseUtils : Player
             return HashCode.Combine(Card, (int) Type, (int) RowType);
         }
     }
-   
-    
+
+
     protected List<Move> GetPossibleMoves()
     {
         return GetPossibleMoves(Hand);
     }
-    
+
     private static List<Move> GetPossibleMoves(IEnumerable cards)
     {
         List<Move> workingList = new List<Move>();
-        
+
         foreach (Card c in cards)
         {
             if (c.IsSpecialAbility)
             {
                 workingList.AddRange
-                (from Row.RowTypes t in Enum.GetValues(typeof(Row.RowTypes)) 
+                (from Row.RowTypes t in Enum.GetValues(typeof(Row.RowTypes))
                     select new Move(c, Card.Types.SpecialAbility, t));
 
                 continue;
@@ -127,7 +125,7 @@ public abstract class OpponentBaseUtils : Player
 
         return workingDictionary;
     }
-    
+
     protected void Play(Move m)
     {
         if (m.Pass)

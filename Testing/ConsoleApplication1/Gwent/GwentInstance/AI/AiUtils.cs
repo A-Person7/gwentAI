@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Linq;
 using System.Reflection;
+using MoreLinq;
 
 namespace ConsoleApplication1.Gwent.GwentInstance.AI;
 
@@ -11,7 +12,9 @@ public static class AiUtils
 {
     private static long GetAiHash(IEnumerable<IHashable> hashables)
     {
-        return hashables.Select((t, i) => t == null ? 0 : 
+        hashables.ForEach(t => Console.WriteLine(t.GetAiHash()));
+        return hashables.Select(
+            (t, i) => t == null ? 0 : 
             t.GetAiHash() * (long) Math.Pow(31, i)).Sum();
     }
     

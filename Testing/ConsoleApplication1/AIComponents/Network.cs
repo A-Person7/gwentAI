@@ -23,7 +23,7 @@ public class Network<T>
     {
         Nodes = toClone.CloneNodes();
         _outputs = toClone._outputs;
-        Stitch(() => (_rand.NextDouble() - 0.5) * 2 * maxDeviance);
+        Stitch(() => (_rand.NextDouble() * 2 - 1) * maxDeviance);
     }
 
     // stitches the nodes together with a multiplier determined by the supplier argument
@@ -59,7 +59,6 @@ public class Network<T>
             {
                 continue;
             }
-
             try
             {
                 workingMax = options.First(o => o.Equals(_outputs[i]));
@@ -78,12 +77,34 @@ public class Network<T>
     {
         ProcessNodes(data);
 
-        // check which index in the last nodes list has the highest value, then return the dictionary value
-        // tolerance check to hopefully prevent imprecision
-        return _outputs[Nodes[^1].FindIndex(n => Math.Abs(n.Strength - Nodes[^1]
-            .Max(m => m.Strength)) < 0.1)];
+        // // check which index in the last nodes list has the highest value, then return the dictionary value
+        // // tolerance check to hopefully prevent imprecision
+        // return _outputs[Nodes[^1].FindIndex(n => Math.Abs(n.Strength - Nodes[^1]
+        //     .Max(m => m.Strength)) < 0.01)];
+
+        Node max = Nodes[^1].First();
+        int index = 0;
+        for (int i = 0; i < Nodes[^1].Count; i++)
+        {
+            if (Nodes[^1][i].Strength <= max.Strength) continue;
+            max = Nodes[^1][i];
+            index = i;
+        }
+
+        return _outputs[index];
     }
 
+    // private void PrintOutputs(List<T> options)
+    // {
+    //     StringBuilder s = new StringBuilder();
+    //     for (int i = 0; i < Nodes[^1].Count; i++)
+    //     {
+    //         double strength = Math.Round(Nodes[^1][i].Strength) * 100000d)/100000d;
+    //         s.Append($"\t{_outputs[i]}: {strength}");
+    //     }
+    //     Console.WriteLine(s.ToString());
+    // }
+    
     private void ProcessNodes(IEnumerable<double> data)
     {
         for (int i = 0; i < Nodes[0].Count; i++)
